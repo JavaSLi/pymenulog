@@ -11,7 +11,7 @@ class TopLevelPausedLog(tkinter.Toplevel):
     self.title('Paused Log')
     self.parent = parent
 
-    self.listLog = Listbox(self, selectmode=SINGLE, width=80, height=60)
+    self.listLog = Listbox(self, selectmode=SINGLE, width=80, height=60, bg='#606060', fg='white')
     
     for item in pausedloglist:
         self.listLog.insert(END, item)
@@ -66,7 +66,7 @@ class MyApp(tkinter.Tk):
     self.listMenu.bind('<ButtonRelease-1>', self.copyMenuCLI)
     self.listMenu.bind('<Double-Button-1>', self.runMenu)
 #------------------------------------------------------
-    self.listLog = Listbox(self.frame, selectmode=SINGLE)
+    self.listLog = Listbox(self.frame, selectmode=SINGLE, bg='#606060', fg='white')
     self.listLog.insert(0,'Log ----------------')
     
     scrollLog = tkinter.Scrollbar(self.frame,width=20)
@@ -81,8 +81,8 @@ class MyApp(tkinter.Tk):
     self.listLog.bind('<Double-Button-1>', self.popupPausedLog)
 #------------------------------------------------------
     rowCLI = tkinter.Frame(self.frame)
-    tkinter.Label(rowCLI, text='Command：', width=9).pack(side=tkinter.LEFT,fill=tkinter.BOTH)
-    entryCLI = tkinter.Entry(rowCLI, textvariable=self.cli, width=40)
+    tkinter.Label(rowCLI, text='Command：', width=9).pack(side=tkinter.LEFT, fill=tkinter.BOTH)
+    entryCLI = tkinter.Entry(rowCLI, textvariable=self.cli, width=40, bg='#606060', fg='white')
     entryCLI.pack(side=tkinter.LEFT,fill=tkinter.BOTH)
     rowCLI.grid(row=1,column=2,columnspan=2,sticky=tkinter.EW,pady=10)
     entryCLI.bind("<Return>", self.runCLI)
