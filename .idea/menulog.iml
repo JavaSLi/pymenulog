@@ -3,6 +3,9 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$/../HR_Tree/package" />
     <content url="file://$MODULE_DIR$/main" />
+    <content url="file://$MODULE_DIR$/tableproc">
+      <sourceFolder url="file://$MODULE_DIR$/tableproc" isTestSource="false" />
+    </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
