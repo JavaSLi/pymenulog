@@ -1,6 +1,5 @@
 from tkinter import *
-from menulogbase import MyApp
-from menulogbase import TopLevelPausedLog
+from menulogbase import MenulogApp
 
 import tkinter as tkinter
 import tkinter.font
@@ -8,7 +7,7 @@ import tkinter.font
 
 class Dial(tkinter.Frame):
     def __init__(self, parent):
-        super().__init__(parent.dialframe)
+        super().__init__(parent.dial_frame)
         self.parent = parent
         self.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=1)
 
@@ -22,22 +21,22 @@ class Dial(tkinter.Frame):
         self.rowconfigure(2, weight=0)
 
         image01 = PhotoImage(file="01.gif")
-        labelImage1 = tkinter.Label(self, image=image01)
-        labelImage1.image = image01
-        labelImage1.grid(row=0, column=0, pady=5)
+        label_image1 = tkinter.Label(self, image=image01)
+        label_image1.image = image01
+        label_image1.grid(row=0, column=0, pady=5)
 
-        labelImage2 = tkinter.Label(self, image=image01)
-        labelImage2.image = image01
-        labelImage2.grid(row=0, column=1, pady=5)
+        label_image2 = tkinter.Label(self, image=image01)
+        label_image2.image = image01
+        label_image2.grid(row=0, column=1, pady=5)
 
         image02 = PhotoImage(file="02.gif")
-        labelImage3 = tkinter.Label(self, image=image02)
-        labelImage3.image = image02
-        labelImage3.grid(row=0, column=2, pady=5)
+        label_image3 = tkinter.Label(self, image=image02)
+        label_image3.image = image02
+        label_image3.grid(row=0, column=2, pady=5)
 
-        labelImage4 = tkinter.Label(self, image=image02)
-        labelImage4.image = image02
-        labelImage4.grid(row=0, column=3, pady=5)
+        label_image4 = tkinter.Label(self, image=image02)
+        label_image4.image = image02
+        label_image4.grid(row=0, column=3, pady=5)
 
         row1 = tkinter.Frame(self)
         row1.grid(row=1, column=0, columnspan=4, sticky=tkinter.NSEW, pady=5)
@@ -51,15 +50,15 @@ class Dial(tkinter.Frame):
         self.param2 = tkinter.IntVar()
         tkinter.Entry(row2, textvariable=self.param2, width=36).pack(side=tkinter.LEFT)
 
-    def run(self, cmdln):
-        cmdln = cmdln.strip()
-        self.param1.set(cmdln)
-        self.parent.addLog(cmdln)
+    def run(self, cmd_line):
+        cmd_line = cmd_line.strip()
+        self.param1.set(cmd_line)
+        self.parent.add_log(cmd_line)
         return
 
 
-def factoryMenu():
-    lstMenu = [
+def prepare_factory_menu():
+    lst_menu = [
         "Menu-example",
         "HELP",
         "  Menudialog consists of three parts, Menu-Area, Log-Area, and Dial-Area,",
@@ -80,11 +79,11 @@ def factoryMenu():
         "  Support Chinese 汉字, Korean 조선어, Japanese にほんご",
         "  "
     ]
-    return lstMenu
+    return lst_menu
 
 
 if __name__ == '__main__':
-    app = MyApp('menulog-example-1', 'dial_example1.txt', factoryMenu())
-    app.setDial(Dial(app))
+    app = MenulogApp('menulog-example-1', 'dial_example1.txt', prepare_factory_menu())
+    app.set_dial(Dial(app))
 
     app.mainloop()

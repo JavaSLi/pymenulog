@@ -1,14 +1,24 @@
 from tkinter import *
-from menulogbase import MyApp
-from menulogbase import TopLevelPausedLog
+from menulogbase import MenulogApp
 
 import tkinter as tkinter
 import tkinter.font
 
 
+def to_text(lst_text):
+    str_text = ''
+    for item in lst_text:
+        str_text = str_text + item + "\n"
+    return str_text
+
+
+def to_list(s_text):
+    return s_text.strip().split('\n')
+
+
 class Dial(tkinter.Frame):
     def __init__(self, parent):
-        super().__init__(parent.dialframe)
+        super().__init__(parent.dial_frame)
         self.parent = parent
         self.hasBlockError = False
 
@@ -37,94 +47,93 @@ class Dial(tkinter.Frame):
         self.txtOutputB = tkinter.Text(self, width=12)
         self.txtOutputB.grid(row=1, column=3, pady=1, sticky=tkinter.NSEW)
 
-    def run(self, cmdln):
-        cmdln = cmdln.strip()
-        if cmdln == 'checkMatch':
-            self.checkMatch(cmdln)
-        elif cmdln == 'exampleCheckMatch1':
-            self.exampleCheckMatch1(cmdln)
-        elif cmdln == 'exampleCheckMatch2':
-            self.exampleCheckMatch2(cmdln)
+    def run(self, cmd_line):
+        cmd_line = cmd_line.strip()
+        if cmd_line == 'checkMatch':
+            self.check_match(cmd_line)
+        elif cmd_line == 'exampleCheckMatch1':
+            self.example_check_match_1(cmd_line)
+        elif cmd_line == 'exampleCheckMatch2':
+            self.example_check_match_2(cmd_line)
         else:
-            self.parent.addLog('')
-            self.parent.addLog("Error! Illegal Command : " + cmdln)
+            self.parent.add_log('')
+            self.parent.add_log("Error! Illegal Command : " + cmd_line)
         return
 
-    def checkMatch(self, cmdln):
-        self.parent.addLog('')
-        self.parent.addLog(cmdln)
+    def check_match(self, cmd_line):
+        self.parent.add_log('')
+        self.parent.add_log(cmd_line)
 
         self.txtOutputA.delete(0.0, END)
         self.txtOutputB.delete(0.0, END)
-        lstInputA = self.toList(self.txtInputA.get(0.0, END))
-        lstInputB = self.toList(self.txtInputB.get(0.0, END))
+        lst_input_a = to_list(self.txtInputA.get(0.0, END))
+        lst_input_b = to_list(self.txtInputB.get(0.0, END))
 
-        if len(lstInputA) == 1 and lstInputA[0].strip() == '':
-            self.parent.addLog('Error! No data in InputA')
+        if len(lst_input_a) == 1 and lst_input_a[0].strip() == '':
+            self.parent.add_log('Error! No data in InputA')
             return
-        if len(lstInputB) == 1 and lstInputB[0].strip() == '':
-            self.parent.addLog('Error! No data in InputB')
+        if len(lst_input_b) == 1 and lst_input_b[0].strip() == '':
+            self.parent.add_log('Error! No data in InputB')
             return
 
-        lstOutputA = []
-        for item in lstInputA:
-            lstOutputA.append('')
-        lstOutputB = []
-        for item in lstInputB:
-            lstOutputB.append('')
+        lst_output_a = [''] * len(lst_input_a)
+        lst_output_b = [''] * len(lst_input_b)
 
         self.hasBlockError = False
-        self.check_repeat('InputA', lstInputA, lstOutputA)
-        self.check_repeat('InputB', lstInputB, lstOutputB)
+        self.check_repeat('InputA', lst_input_a, lst_output_a)
+        self.check_repeat('InputB', lst_input_b, lst_output_b)
 
-        if self.hasBlockError == False:
-            self.check_match_no_repeat('InputA', lstInputA, lstInputB, lstOutputA)
-            self.check_match_no_repeat('InputB', lstInputB, lstInputA, lstOutputB)
+        if not self.hasBlockError:
+            self.check_match_no_repeat('InputA', lst_input_a, lst_input_b, lst_output_a)
+            self.check_match_no_repeat('InputB', lst_input_b, lst_input_a, lst_output_b)
 
-        self.txtOutputA.insert(END, self.toText(lstOutputA))
-        self.txtOutputB.insert(END, self.toText(lstOutputB))
+        self.txtOutputA.insert(END, to_text(lst_output_a))
+        self.txtOutputB.insert(END, to_text(lst_output_b))
 
-        if self.hasBlockError == False:
-            self.parent.addLog('')
-            self.parent.addLog('OK! Success in check.')
+        if not self.hasBlockError:
+            self.parent.add_log('')
+            self.parent.add_log('OK! Success in check.')
         else:
-            self.parent.addLog('!!!!!!!!!!!!!!!!')
-            self.parent.addLog('Warning! Found some problems in data.')
+            self.parent.add_log('!!!!!!!!!!!!!!!!')
+            self.parent.add_log('Warning! Found some problems in data.')
 
         return
 
-    def check_repeat(self, lstname, lst, lstResult):
+    def check_repeat(self, lst_name, lst, lst_result):
         for i in range(0, len(lst)):
-            for j in range(i+1, len(lst)):
+            for j in range(i + 1, len(lst)):
                 if lst[i] == lst[j]:
-                    lstResult[i:i+1] = ['repeat']
-                    lstResult[j:j+1] = ['repeat']
-                    self.parent.addLog('Repeat in ' + lstname + ' : ' + str(i) + ',' + str(j))
+                    lst_result[i:i + 1] = ['repeat']
+                    lst_result[j:j + 1] = ['repeat']
+                    self.parent.add_log('Repeat in ' + lst_name + ' : ' + str(i) + ',' + str(j))
                     self.hasBlockError = True
         return
-    def check_match_no_repeat(self, lst1name, lst1, lst2, lstResult):
+
+    def check_match_no_repeat(self, lst1name, lst1, lst2, lst_result):
         for i1 in range(0, len(lst1)):
-            bHasMatch = False
+            b_has_match = False
             for i2 in range(0, len(lst2)):
                 if lst1[i1] == lst2[i2]:
-                    bHasMatch = True
+                    b_has_match = True
                     break
-            if bHasMatch == False:
-                lstResult[i1:i1 + 1] = ['No Match']
-                self.parent.addLog('No match in ' + lst1name + ' : ' + str(i1))
+            if not b_has_match:
+                lst_result[i1:i1 + 1] = ['No Match']
+                self.parent.add_log('No match in ' + lst1name + ' : ' + str(i1))
                 self.hasBlockError = True
         return
+
     def clear_text_boxes(self):
         self.txtInputA.delete(0.0, END)
         self.txtInputB.delete(0.0, END)
         self.txtOutputA.delete(0.0, END)
         self.txtOutputB.delete(0.0, END)
         return
-    def exampleCheckMatch1(self, cmdln):
-        self.parent.addLog('')
-        self.parent.addLog(cmdln)
+
+    def example_check_match_1(self, cmd_line):
+        self.parent.add_log('')
+        self.parent.add_log(cmd_line)
         self.clear_text_boxes()
-        lstInputA = [
+        lst_input_a = [
             "dog",
             "donkey",
             "horse",
@@ -133,8 +142,8 @@ class Dial(tkinter.Frame):
             "dog",
             "deer",
             "wolf"
-            ]
-        lstInputB = [
+        ]
+        lst_input_b = [
             "dog",
             "donkey",
             "horse",
@@ -143,17 +152,18 @@ class Dial(tkinter.Frame):
             "deer",
             "lion",
             "wolf"
-            ]
-        self.txtInputA.insert(END, self.toText(lstInputA))
-        self.txtInputB.insert(END, self.toText(lstInputB))
+        ]
+        self.txtInputA.insert(END, to_text(lst_input_a))
+        self.txtInputB.insert(END, to_text(lst_input_b))
 
         return
-    def exampleCheckMatch2(self, cmdln):
-        self.parent.addLog('')
-        self.parent.addLog(cmdln)
+
+    def example_check_match_2(self, cmd_line):
+        self.parent.add_log('')
+        self.parent.add_log(cmd_line)
         self.clear_text_boxes()
 
-        lstInputA = [
+        lst_input_a = [
             "dog",
             "donkey",
             "horse",
@@ -161,8 +171,8 @@ class Dial(tkinter.Frame):
             "tiger",
             "deer",
             "wolf"
-            ]
-        lstInputB = [
+        ]
+        lst_input_b = [
             "dog",
             "donkey",
             "horse",
@@ -170,23 +180,15 @@ class Dial(tkinter.Frame):
             "tiger1",
             "deer",
             "wolf"
-            ]
-        self.txtInputA.insert(END, self.toText(lstInputA))
-        self.txtInputB.insert(END, self.toText(lstInputB))
+        ]
+        self.txtInputA.insert(END, to_text(lst_input_a))
+        self.txtInputB.insert(END, to_text(lst_input_b))
 
         return
 
-    def toList(self, sText):
-        return sText.strip().split('\n')
 
-    def toText(self, lst_text):
-        str_text = ''
-        for item in lst_text:
-            str_text = str_text + item + "\n"
-        return str_text
-
-def factoryMenu():
-    lstMenu = [
+def prepare_factory_menu():
+    lst_menu = [
         "Table data process",
         "HELP",
         "  检查表格对应",
@@ -207,10 +209,11 @@ def factoryMenu():
         "  Support Chinese 汉字, Korean 조선어, Japanese にほんご",
         "   "
     ]
-    return lstMenu
+    return lst_menu
+
 
 if __name__ == '__main__':
-    app = MyApp('menulog-table-process', 'dial_tableproc.txt', factoryMenu())
-    app.setDial(Dial(app))
+    app = MenulogApp('menulog-table-process', 'dial_tableproc.txt', prepare_factory_menu())
+    app.set_dial(Dial(app))
 
     app.mainloop()
