@@ -10,7 +10,7 @@ class Dial(tkinter.Frame):
     def __init__(self, parent):
         super().__init__(parent.dialframe)
         self.parent = parent
-        self.pack(side=tkinter.LEFT, fill=tkinter.BOTH)
+        self.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=1)
 
         # self.config(bd=1, relief=tkinter.SOLID)
         self.columnconfigure(0, weight=1)
@@ -18,37 +18,35 @@ class Dial(tkinter.Frame):
         self.columnconfigure(2, weight=1)
         self.columnconfigure(3, weight=1)
         self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-
-        tkinter.Label(self, text='DIAL board', width=20).grid(row=0, column=0, columnspan=4, sticky=tkinter.NSEW,
-                                                              pady=5)
+        self.rowconfigure(1, weight=0)
+        self.rowconfigure(2, weight=0)
 
         image01 = PhotoImage(file="01.gif")
         labelImage1 = tkinter.Label(self, image=image01)
         labelImage1.image = image01
-        labelImage1.grid(row=1, column=0, pady=5)
+        labelImage1.grid(row=0, column=0, pady=5)
 
         labelImage2 = tkinter.Label(self, image=image01)
         labelImage2.image = image01
-        labelImage2.grid(row=1, column=1, pady=5)
+        labelImage2.grid(row=0, column=1, pady=5)
 
         image02 = PhotoImage(file="02.gif")
         labelImage3 = tkinter.Label(self, image=image02)
         labelImage3.image = image02
-        labelImage3.grid(row=1, column=2, pady=5)
+        labelImage3.grid(row=0, column=2, pady=5)
 
         labelImage4 = tkinter.Label(self, image=image02)
         labelImage4.image = image02
-        labelImage4.grid(row=1, column=3, pady=5)
+        labelImage4.grid(row=0, column=3, pady=5)
 
         row1 = tkinter.Frame(self)
-        row1.grid(row=2, column=0, columnspan=4, sticky=tkinter.NSEW, pady=5)
+        row1.grid(row=1, column=0, columnspan=4, sticky=tkinter.NSEW, pady=5)
         tkinter.Label(row1, text='Parameter1:', width=10).pack(side=tkinter.LEFT)
         self.param1 = tkinter.StringVar()
         tkinter.Entry(row1, textvariable=self.param1, width=36).pack(side=tkinter.LEFT)
 
         row2 = tkinter.Frame(self)
-        row2.grid(row=3, column=0, columnspan=4, sticky=tkinter.NSEW, pady=5)
+        row2.grid(row=2, column=0, columnspan=4, sticky=tkinter.NSEW, pady=5)
         tkinter.Label(row2, text='Parameter2:', width=10).pack(side=tkinter.LEFT)
         self.param2 = tkinter.IntVar()
         tkinter.Entry(row2, textvariable=self.param2, width=36).pack(side=tkinter.LEFT)

@@ -6,57 +6,34 @@ import os
 import codecs
 
 
-class TopLevelPausedLog(tkinter.Toplevel):
-    def __init__(self, parent, pausedloglist):
-        super().__init__()
-        self.title('Paused Log')
-        self.parent = parent
-
-        self.listLog = Listbox(self, selectmode=SINGLE, width=80, height=60, bg='#D0D0D0', fg='black')
-
-        for item in pausedloglist:
-            self.listLog.insert(END, item)
-        self.listLog.yview_moveto(1)
-
-        sc = tkinter.Scrollbar(self)
-        sc.pack(side=tkinter.RIGHT, fill=tkinter.Y)
-        sc['command'] = self.listLog.yview  # Same as sc.configure(command=self.listLog.yview)
-
-        self.listLog.config(yscrollcommand=sc.set)
-        self.listLog.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=1)
-
-        self.listLog.bind('<Double-Button-1>', self.copyLogCLI)
-
-        self.geometry('1000x600')
-        self.geometry('+200+200')
-
-    def copyLogCLI(self, event):
-        tup1 = self.listLog.curselection()
-        if len(tup1) > 0:
-            self.parent.cli.set(self.listLog.get(tup1[0]).strip())
-            self.parent.entryCLI.focus_set()
-            self.destroy()
-        return
-
 class MyApp(tkinter.Tk):
     def __init__(self, menuFilename, factoryMenu):
         super().__init__()
         self.title('Menulog')
 
         self.cli = tkinter.StringVar()
-        fontemp = tkinter.font.Font(self, size=12, weight='bold', underline=False)
+        self.mouse_click_count = 0
+
+        self.userMenu = self.readMenuFile(menuFilename, factoryMenu)
+
+        self.setupUI()
+
+    def setupUI(self):
         # ------------------------------------------------------
         self.frame = Frame(self)
         self.frame.pack(fill=BOTH, expand=1)
         self.frame.columnconfigure(0, weight=1)
+        self.frame.columnconfigure(1, weight=0)
         self.frame.columnconfigure(2, weight=2)
+        self.frame.columnconfigure(3, weight=0)
         self.frame.rowconfigure(0, weight=1)
-        self.frame.rowconfigure(2, weight=1)
+        self.frame.rowconfigure(1, weight=0)
+        self.frame.rowconfigure(2, weight=2)
 
         # ------------------------------------------------------
+        fontemp = tkinter.font.Font(self, size=12, weight='normal', underline=False)
         self.listMenu = Listbox(self.frame, width=40, selectmode=SINGLE, font=fontemp)
 
-        self.userMenu = self.readMenuFile(menuFilename, factoryMenu)
         for item in self.userMenu:
             self.listMenu.insert(END, self.toView(item))
 
@@ -67,9 +44,9 @@ class MyApp(tkinter.Tk):
         self.listMenu.config(yscrollcommand=scrollMenu.set)
         self.listMenu.grid(row=0, column=0, rowspan=3, sticky=tkinter.NSEW)
 
-        # self.listMenu.bind('<ButtonRelease-1>', self.copyMenuCLI)
-        self.listMenu.bind('<Button-1>', self.copyMenuCLI)
-        self.listMenu.bind('<Double-Button-1>', self.runMenu)
+        self.listMenu.bind('<ButtonRelease-1>', self.mouse_release_menu)
+        self.listMenu.bind('<Button-1>', self.mouse_click)
+        self.listMenu.bind('<Double-Button-1>', self.mouse_double_click)
         # ------------------------------------------------------
         self.listLog = Listbox(self.frame, width=48, selectmode=SINGLE, bg='#606060', fg='white')
         self.listLog.insert(0, 'Log ----------------')
@@ -105,8 +82,8 @@ class MyApp(tkinter.Tk):
         self.dialframe.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
 
         self.geometry('1200x800')
+        return
 
-    #     self.setupUI()
     def toView(self, line):
         arrArg = line.strip().split('//', 1)
         if len(arrArg) > 1:
@@ -146,14 +123,23 @@ class MyApp(tkinter.Tk):
         else:
             return ""
 
-    def runMenu(self, event):
-        self.dial.run(self.toCmdln(self.getSeletecMenuItem()))
-        self.cli.set("")
+    def mouse_click(self, event):
+        self.mouse_click_count = 1
         return
 
-    def copyMenuCLI(self, event):
-        self.cli.set(self.getSeletecMenuItem())
-        self.entryCLI.focus_set()
+    def mouse_double_click(self, event):
+        self.mouse_click_count = 2
+        return
+
+    def mouse_release_menu(self, event):
+        if self.mouse_click_count == 1:
+            self.cli.set(self.getSeletecMenuItem())
+            self.entryCLI.focus_set()
+        elif self.mouse_click_count == 2:
+            self.dial.run(self.toCmdln(self.getSeletecMenuItem()))
+            self.cli.set("")
+            self.entryCLI.focus_set()
+        self.mouse_click_count = 0
         return
 
     def popupPausedLog(self, event):
@@ -179,3 +165,53 @@ class MyApp(tkinter.Tk):
             fRead.close()
 
         return userMenu
+
+
+class TopLevelPausedLog(tkinter.Toplevel):
+    def __init__(self, parent, pausedloglist):
+        super().__init__()
+        self.title('Paused Log')
+        self.parent = parent
+
+        scrlbarY = Scrollbar(self)
+        scrlbarY.pack(side=RIGHT, fill=Y)
+        scrlbarX = Scrollbar(self, orient=HORIZONTAL)
+        scrlbarX.pack(side=BOTTOM, fill=X)
+
+        txtLog = Text(self, yscrollcommand=scrlbarY.set, xscrollcommand=scrlbarX.set, width=80, height=60, bg='#D0D0D0',
+                      fg='black', wrap='none')
+        txtLog.pack(expand=YES, fill=BOTH)
+        for item in pausedloglist:
+            txtLog.insert(END, item)
+            txtLog.insert(END, "\n")
+
+        scrlbarY.config(command=txtLog.yview)
+        scrlbarX.config(command=txtLog.xview)
+
+        # self.txtInputA.grid(row=1, column=0, pady=1, sticky=tkinter.NSEW)
+        #
+        # self.listLog = Listbox(self, selectmode=SINGLE, width=80, height=60, bg='#D0D0D0', fg='black')
+        #
+        # for item in pausedloglist:
+        #     self.listLog.insert(END, item)
+        # self.listLog.yview_moveto(1)
+        #
+        # sc = tkinter.Scrollbar(self)
+        # sc.pack(side=tkinter.RIGHT, fill=tkinter.Y)
+        # sc['command'] = self.listLog.yview  # Same as sc.configure(command=self.listLog.yview)
+        #
+        # self.listLog.config(yscrollcommand=sc.set)
+        # self.listLog.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=1)
+        #
+        # self.listLog.bind('<Double-Button-1>', self.copyLogCLI)
+
+        self.geometry('1200x600')
+        self.geometry('+200+200')
+
+    # def copyLogCLI(self, event):
+    #     tup1 = self.listLog.curselection()
+    #     if len(tup1) > 0:
+    #         self.parent.cli.set(self.listLog.get(tup1[0]).strip())
+    #         self.parent.entryCLI.focus_set()
+    #         self.destroy()
+    #     return
