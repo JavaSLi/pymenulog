@@ -7,9 +7,9 @@ import codecs
 
 
 class MyApp(tkinter.Tk):
-    def __init__(self, menuFilename, factoryMenu):
+    def __init__(self, title, menuFilename, factoryMenu):
         super().__init__()
-        self.title('Menulog')
+        self.title(title)
 
         self.cli = tkinter.StringVar()
         self.mouse_click_count = 0

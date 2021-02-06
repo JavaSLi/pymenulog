@@ -84,7 +84,7 @@ def factoryMenu():
 
 
 if __name__ == '__main__':
-    app = MyApp('dial_example1.txt', factoryMenu())
+    app = MyApp('menulog-example-1', 'dial_example1.txt', factoryMenu())
     app.setDial(Dial(app))
 
     app.mainloop()

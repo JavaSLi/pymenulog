@@ -210,7 +210,7 @@ def factoryMenu():
     return lstMenu
 
 if __name__ == '__main__':
-    app = MyApp('dial_tableproc.txt', factoryMenu())
+    app = MyApp('menulog-table-process', 'dial_tableproc.txt', factoryMenu())
     app.setDial(Dial(app))
 
     app.mainloop()
