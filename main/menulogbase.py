@@ -4,14 +4,82 @@ import tkinter as tkinter
 import tkinter.font
 import os
 import codecs
+import subprocess
+
+MAX_LOG = 1000
+
+CMD_HELP = 'help'
+CMD_PRINT_MENU = 'menu'
+CMD_OPEN_MENU_DIRECTORY = 'openMenuDir'
+CMD_OPEN_MENU_FILE = 'openMenuFile'
+CMD_REFRESH_MENU = 'refreshMenu'
+
+
+def get_common_help_list():
+    return [
+        "*******************************",
+        "",
+        "Menulog 包括三个区域：",
+        "    菜单（Menu）区域"
+        "    日志（Log）区域",
+        "    表盘（Dial）区域",
+        "另外，再加上一个命令行（CLI）输入框。",
+        "",
+        "菜单区域的内容由两部分组成：",
+        "    程序本身自带的菜单（厂商菜单）",
+        "    用户自己编辑的菜单文件部分",
+        "菜单中有的命令行可以直接双击鼠标执行。",
+        "命令行的格式：命令+两个斜杠/+注释说明。",
+        "请试一试命令(" + CMD_OPEN_MENU_DIRECTORY + ")打开菜单目录，编辑菜单文件。",
+        "",
+        "日志区域的内容来自命令执行过程。",
+        "双击鼠标将弹出停滞的日志内容，可以剪切粘贴内容。",
+        "",
+        "表盘区域的内容主要是参数和状态数据。",
+        "",
+        "用户自编辑的菜单文件支持多种文字：",
+        "Chinese 汉字",
+        "Japanese にほんご",
+        "Korean 조선어",
+        "",
+        ""
+    ]
+
+
+def get_common_factory_menu():
+    return [
+        "*******************************",
+        "",
+        CMD_OPEN_MENU_FILE + "//打开用户菜单文件",
+        "",
+        CMD_REFRESH_MENU + "//刷新菜单",
+        "",
+        CMD_OPEN_MENU_DIRECTORY + "//打开目录",
+        "",
+        CMD_PRINT_MENU + "//打印菜单",
+        "",
+        CMD_HELP + "//帮助",
+        ""
+    ]
+
+
+def open_dir_file(filename, menulog):
+    try:
+        os.startfile(filename)
+    except Exception as e:
+        menulog.add_log(e)
+        subprocess.Popen(['xdg-open', filename])
 
 
 class MenulogApp(tkinter.Tk):
-    def __init__(self, title, menu_file_name, factory_menu):
+    def __init__(self, title, menu_file_name, factory_menu, lst_help):
         super().__init__()
 
         self.title(title)
-        self.MAX_LOG = 1000
+        self.menu_file_name = menu_file_name
+        self.factory_menu = factory_menu
+        self.user_factory_menu = []
+        self.lst_help = lst_help
 
         self.cli = tkinter.StringVar()
         self.mouse_click_count = 0
@@ -21,8 +89,6 @@ class MenulogApp(tkinter.Tk):
         self.dial_frame = None
 
         self.dial = None
-
-        self.user_factory_menu = self.read_menu_file(menu_file_name, factory_menu)
 
         self.setup_ui()
 
@@ -72,8 +138,7 @@ class MenulogApp(tkinter.Tk):
 
         self.list_menu = Listbox(frame, width=40, selectmode=SINGLE, bg='#E0E0E0', font=font_menu)
 
-        for item in self.user_factory_menu:
-            self.list_menu.insert(END, self.to_view(item))
+        self.refresh_menu_list()
 
         # scrollbar_y = Scrollbar(frame, width=20)
         scrollbar_y = Scrollbar(frame)
@@ -117,15 +182,41 @@ class MenulogApp(tkinter.Tk):
     def add_log(self, msg):
         self.list_log.insert(END, msg)
         # msg = msg.strip()
-        while self.list_log.size() > self.MAX_LOG:
+        while self.list_log.size() > MAX_LOG:
             self.list_log.delete(0)
         # if len(msg) > 0:
         #     self.listLog.insert(END, msg)
         self.list_log.yview_moveto(1)
         return
 
+    def run(self, cmd_line):
+        cmd_line = cmd_line.strip()
+        if len(cmd_line) == 0:
+            return
+
+        if cmd_line == CMD_HELP:
+            self.add_log_help()
+            self.dial.record_cmd(cmd_line)
+        elif cmd_line == CMD_PRINT_MENU:
+            self.add_log_menu()
+            self.dial.record_cmd(cmd_line)
+        elif cmd_line == CMD_OPEN_MENU_FILE:
+            open_dir_file('.\\' + self.menu_file_name, self)
+            self.dial.record_cmd(cmd_line)
+        elif cmd_line == CMD_OPEN_MENU_DIRECTORY:
+            open_dir_file('.', self)
+            self.dial.record_cmd(cmd_line)
+        elif cmd_line == CMD_REFRESH_MENU:
+            self.refresh_menu_list()
+            self.dial.record_cmd(cmd_line)
+        elif self.dial.run(cmd_line):
+            pass
+        else:
+            self.add_log_unknown_cmd(cmd_line)
+        return
+
     def run_cli(self, _):
-        self.dial.run(self.cli.get())
+        self.run(self.cli.get())
         self.cli.set("")
         return
 
@@ -149,7 +240,7 @@ class MenulogApp(tkinter.Tk):
             self.cli.set(self.get_selected_menu_item())
             self.entry_cli.focus_set()
         elif self.mouse_click_count == 2:
-            self.dial.run(MenulogApp.to_cmd_line(self.get_selected_menu_item()))
+            self.run(MenulogApp.to_cmd_line(self.get_selected_menu_item()))
             self.cli.set("")
             self.entry_cli.focus_set()
         self.mouse_click_count = 0
@@ -164,34 +255,30 @@ class MenulogApp(tkinter.Tk):
         #     self.wait_window(pw) # This line is very important ! ! !
         return
 
-    @staticmethod
-    def read_menu_file(filename, factory_menu):
-        user_factory_menu = ['****** user menu ****** (file:' + filename + ')']
-        # if not os.path.isfile(filename):
-        #     fo = codecs.open(filename, 'w', 'utf-8')
-        #     # for item in factory_menu:
-        #     #     fo.write(item + "\n")
-        #     fo.close()
+    def refresh_menu_list(self):
+        self.user_factory_menu = ['****** user menu ****** (file:' + self.menu_file_name + ')']
 
         user_menu = []
-        if os.path.isfile(filename):
-            f_user_menu = codecs.open(filename, 'r', 'utf-8')
+        if os.path.isfile(self.menu_file_name):
+            f_user_menu = codecs.open(self.menu_file_name, 'r', 'utf-8')
             user_menu = f_user_menu.readlines()
             for item in user_menu:
-                user_factory_menu.append(item)
+                self.user_factory_menu.append(item)
             f_user_menu.close()
         else:
-            f_user_menu = codecs.open(filename, 'w', 'utf-8')
+            f_user_menu = codecs.open(self.menu_file_name, 'w', 'utf-8')
             f_user_menu.close()
 
         if len(user_menu) == 0:
-            user_factory_menu.append('<EMPTY>')
+            self.user_factory_menu.append('<EMPTY>')
 
-        user_factory_menu.append('****** factory menu ******')
-        for item in factory_menu:
-            user_factory_menu.append(item)
+        self.user_factory_menu.append('****** factory menu ******')
+        for item in self.factory_menu:
+            self.user_factory_menu.append(item)
 
-        return user_factory_menu
+        self.list_menu.delete(0, tkinter.END)
+        for item in self.user_factory_menu:
+            self.list_menu.insert(END, self.to_view(item))
 
     @staticmethod
     def to_view(line):
@@ -215,11 +302,21 @@ class MenulogApp(tkinter.Tk):
             return m.group(1)
         else:
             return ''
-        # arr_arg = line.strip().split('//', 1)
-        # if len(arr_arg) > 1:
-        #     return arr_arg[0]
-        # else:
-        #     return ''
+
+    def add_log_unknown_cmd(self, cmd_line):
+        self.menulog.add_log('')
+        self.menulog.add_log("Error! Unknown Command : " + cmd_line)
+        return
+
+    def add_log_help(self):
+        for item in self.lst_help:
+            self.add_log(item)
+        return
+
+    def add_log_menu(self):
+        for item in self.user_factory_menu:
+            self.add_log(item)
+        return
 
 
 class TopLevelPausedLog(tkinter.Toplevel):
