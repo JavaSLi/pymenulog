@@ -21,7 +21,7 @@ class MenulogApp(tkinter.Tk):
 
         self.dial = None
 
-        self.userMenu = self.read_menu_file(menu_file_name, factory_menu)
+        self.user_factory_menu = self.read_menu_file(menu_file_name, factory_menu)
 
         self.setup_ui()
 
@@ -30,64 +30,85 @@ class MenulogApp(tkinter.Tk):
         self.frame = Frame(self)
         self.frame.pack(fill=BOTH, expand=1)
         self.frame.columnconfigure(0, weight=1)
-        self.frame.columnconfigure(1, weight=0)
-        self.frame.columnconfigure(2, weight=2)
-        self.frame.columnconfigure(3, weight=0)
+        self.frame.columnconfigure(1, weight=2)
         self.frame.rowconfigure(0, weight=1)
         self.frame.rowconfigure(1, weight=0)
         self.frame.rowconfigure(2, weight=2)
-
         # ------------------------------------------------------
-        font_menu = tkinter.font.Font(self, size=12, weight='normal', underline=False)
-        self.list_menu = Listbox(self.frame, width=40, selectmode=SINGLE, font=font_menu)
-
-        for item in self.userMenu:
-            self.list_menu.insert(END, self.to_view(item))
-
-        scroll_menu = tkinter.Scrollbar(self.frame, width=20)
-        scroll_menu['command'] = self.list_menu.yview  # Same as scroll_menu.configure(command=self.listMenu.yview)
-        scroll_menu.grid(row=0, column=1, rowspan=3, sticky=tkinter.E + tkinter.NS)
-
-        self.list_menu.config(yscrollcommand=scroll_menu.set)
-        self.list_menu.grid(row=0, column=0, rowspan=3, sticky=tkinter.NSEW)
-
-        self.list_menu.bind('<ButtonRelease-1>', self.mouse_release_menu)
-        self.list_menu.bind('<Button-1>', self.mouse_click)
-        self.list_menu.bind('<Double-Button-1>', self.mouse_double_click)
+        menu_area = tkinter.Frame(self.frame)
+        menu_area.grid(row=0, column=0, rowspan=3, sticky=tkinter.NSEW, padx=2, pady=2)
+        menu_area.config(bd=1, relief=tkinter.SOLID)
+        self.setup_ui_menu_area(menu_area)
         # ------------------------------------------------------
-        self.list_log = Listbox(self.frame, width=48, selectmode=SINGLE, bg='#606060', fg='white')
-        self.list_log.insert(0, 'Log ----------------')
-
-        scroll_log = tkinter.Scrollbar(self.frame, width=20)
-        # scroll_log['command']=self.listLog.yview #Same as scroll_log.configure(command=self.listLog.yview)
-        scroll_log.configure(command=self.list_log.yview)
-        scroll_log.grid(row=0, column=3, sticky=tkinter.E + tkinter.NS)
-
-        self.list_log.config(yscrollcommand=scroll_log.set)
-        #     self.listLog.pack(side=tkinter.LEFT,fill=tkinter.BOTH)
-        self.list_log.grid(row=0, column=2, sticky=tkinter.NSEW)
-
-        #     self.listLog.bind('<Button-1>', self.setName)
-        self.list_log.bind('<Double-Button-1>', self.popup_paused_log)
+        log_area = tkinter.Frame(self.frame)
+        log_area.grid(row=0, column=1, sticky=tkinter.NSEW, padx=2, pady=2)
+        log_area.config(bd=1, relief=tkinter.SOLID)
+        self.setup_ui_log_area(log_area)
         # ------------------------------------------------------
         row_cli = tkinter.Frame(self.frame)
+        row_cli.grid(row=1, column=1, sticky=tkinter.EW, padx=10, pady=2)
+
         tkinter.Label(row_cli, text='Command：', width=9).pack(side=tkinter.LEFT, fill=tkinter.BOTH)
         self.entry_cli = tkinter.Entry(row_cli, textvariable=self.cli, width=50, bg='#606060', fg='white')
         self.entry_cli.pack(side=tkinter.LEFT, fill=tkinter.BOTH)
-        row_cli.grid(row=1, column=2, columnspan=2, sticky=tkinter.EW, pady=10)
         self.entry_cli.bind("<Return>", self.run_cli)
         # ------------------------------------------------------
         dial_area = tkinter.Frame(self.frame)
-        dial_area.grid(row=2, column=2, columnspan=2, sticky=tkinter.NSEW, pady=5, padx=5)
-        dial_area.config(bd=3, relief=tkinter.SOLID)
+        dial_area.grid(row=2, column=1, sticky=tkinter.NSEW, padx=2, pady=2)
+        dial_area.config(bd=4, relief=tkinter.SOLID)
 
         tkinter.Label(dial_area, text='DIAL board', bg='#000080', fg='white', width=20).pack(side=tkinter.TOP,
                                                                                              fill=tkinter.X)
         self.dial_frame = tkinter.Frame(dial_area)
         self.dial_frame.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
+        # ------------------------------------------------------
 
         self.geometry('1200x800')
         return
+
+    def setup_ui_menu_area(self, frame):
+        font_menu = tkinter.font.Font(self, size=12, weight='normal', underline=False)
+
+        self.list_menu = Listbox(frame, width=40, selectmode=SINGLE, bg='#E0E0E0', font=font_menu)
+
+        for item in self.user_factory_menu:
+            self.list_menu.insert(END, self.to_view(item))
+
+        # scrollbar_y = Scrollbar(frame, width=20)
+        scrollbar_y = Scrollbar(frame)
+        scrollbar_y.pack(side=RIGHT, fill=Y)
+        scrollbar_x = Scrollbar(frame, orient=HORIZONTAL)
+        scrollbar_x.pack(side=BOTTOM, fill=X)
+
+        scrollbar_y.config(command=self.list_menu.yview)
+        scrollbar_x.config(command=self.list_menu.xview)
+
+        self.list_menu.config(yscrollcommand=scrollbar_y.set)
+        self.list_menu.config(xscrollcommand=scrollbar_x.set)
+        self.list_menu.pack(expand=YES, fill=BOTH)  # put this line under scrollbar_.pack()
+
+        self.list_menu.bind('<ButtonRelease-1>', self.mouse_release_menu)
+        self.list_menu.bind('<Button-1>', self.mouse_click)
+        self.list_menu.bind('<Double-Button-1>', self.mouse_double_click)
+
+    def setup_ui_log_area(self, frame):
+        self.list_log = Listbox(frame, width=40, selectmode=SINGLE, bg='#606060', fg='white')
+        self.list_log.insert(0, 'Log ----------------')
+
+        # scrollbar_y = Scrollbar(frame, width=20)
+        scrollbar_y = Scrollbar(frame)
+        scrollbar_y.pack(side=RIGHT, fill=Y)
+        scrollbar_x = Scrollbar(frame, orient=HORIZONTAL)
+        scrollbar_x.pack(side=BOTTOM, fill=X)
+
+        scrollbar_y.config(command=self.list_log.yview)
+        scrollbar_x.config(command=self.list_log.xview)
+
+        self.list_log.config(yscrollcommand=scrollbar_y.set)
+        self.list_log.config(xscrollcommand=scrollbar_x.set)
+        self.list_log.pack(expand=YES, fill=BOTH)  # put this line under scrollbar_.pack()
+
+        self.list_log.bind('<Double-Button-1>', self.popup_paused_log)
 
     def set_dial(self, dial):
         self.dial = dial
@@ -110,7 +131,7 @@ class MenulogApp(tkinter.Tk):
     def get_selected_menu_item(self):
         tup1 = self.list_menu.curselection()
         if len(tup1) > 0:
-            return self.userMenu[tup1[0]].strip()
+            return self.user_factory_menu[tup1[0]].strip()
         else:
             return ""
 
@@ -144,19 +165,32 @@ class MenulogApp(tkinter.Tk):
 
     @staticmethod
     def read_menu_file(filename, factory_menu):
-        if not os.path.isfile(filename):
-            fo = codecs.open(filename, 'w', 'utf-8')
-            for item in factory_menu:
-                fo.write(item + "\n")
-            fo.close()
+        user_factory_menu = ['****** user menu ****** (file:' + filename + ')']
+        # if not os.path.isfile(filename):
+        #     fo = codecs.open(filename, 'w', 'utf-8')
+        #     # for item in factory_menu:
+        #     #     fo.write(item + "\n")
+        #     fo.close()
 
         user_menu = []
         if os.path.isfile(filename):
-            f_read = codecs.open(filename, 'r', 'utf-8')
-            user_menu = f_read.readlines()
-            f_read.close()
+            f_user_menu = codecs.open(filename, 'r', 'utf-8')
+            user_menu = f_user_menu.readlines()
+            for item in user_menu:
+                user_factory_menu.append(item)
+            f_user_menu.close()
+        else:
+            f_user_menu = codecs.open(filename, 'w', 'utf-8')
+            f_user_menu.close()
 
-        return user_menu
+        if len(user_menu) == 0:
+            user_factory_menu.append('<EMPTY>')
+
+        user_factory_menu.append('****** factory menu ******')
+        for item in factory_menu:
+            user_factory_menu.append(item)
+
+        return user_factory_menu
 
     @staticmethod
     def to_view(line):
