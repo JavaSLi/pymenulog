@@ -6,9 +6,16 @@ from model_tableproc import DataSet
 
 import tkinter as tkinter
 import tkinter.font
+import os
+import subprocess
+
+TITLE = 'menulog-table-process'
+USER_MENU_FILE = 'dial_tableproc.txt'
 
 CMD_HELP = 'help'
 CMD_PRINT_MENU = 'menu'
+CMD_OPEN_MENU_DIRECTORY = 'openMenuDir'
+CMD_OPEN_MENU_FILE = 'openMenuFile'
 
 CMD_CHECK_MATCH = 'checkMatch'
 CMD_EXAMPLE_1 = 'exampleCheckMatch1'
@@ -19,8 +26,16 @@ class Dial(tkinter.Frame):
     def __init__(self, parent_menulog):
         super().__init__(parent_menulog.dial_frame)
         self.menulog = parent_menulog
-        self.hasBlockError = False
 
+        self.txtInputA = None
+        self.txtInputB = None
+        self.txtOutputA = None
+        self.txtOutputB = None
+
+        self.setup_ui()
+
+    def setup_ui(self):
+        # ------------------------------------------------------
         self.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=1)
 
         self.columnconfigure(0, weight=1)
@@ -56,6 +71,10 @@ class Dial(tkinter.Frame):
             self.add_log_help()
         elif cmd_line == CMD_PRINT_MENU:
             self.add_log_menu()
+        elif cmd_line == CMD_OPEN_MENU_FILE:
+            self.open_dir_file('.\\' + USER_MENU_FILE)
+        elif cmd_line == CMD_OPEN_MENU_DIRECTORY:
+            self.open_dir_file('.')
         elif cmd_line == 'checkMatch':
             self.add_log_echo(cmd_line)
             model_tableproc.check_match(data_set, self.menulog)
@@ -110,6 +129,13 @@ class Dial(tkinter.Frame):
             self.menulog.add_log(item)
         return
 
+    def open_dir_file(self, filename):
+        try:
+            os.startfile(filename)
+        except Exception as e:
+            self.menulog.add_log(e)
+            subprocess.Popen(['xdg-open', filename])
+
 
 def get_lst_help():
     return [
@@ -156,15 +182,21 @@ def prepare_factory_menu():
         CMD_EXAMPLE_2 + "//表格对应_EXAMPLE_2",
         "",
         "*******************************",
-        CMD_HELP + "//帮助",
+        "",
+        CMD_OPEN_MENU_FILE + "//打开用户菜单文件",
+        "",
+        CMD_OPEN_MENU_DIRECTORY + "//打开目录",
+        "",
         CMD_PRINT_MENU + "//打印菜单",
+        "",
+        CMD_HELP + "//帮助",
         ""
     ]
     return lst_menu
 
 
 if __name__ == '__main__':
-    menulog = MenulogApp('menulog-table-process', 'dial_tableproc.txt', prepare_factory_menu())
+    menulog = MenulogApp(TITLE, USER_MENU_FILE, prepare_factory_menu())
     menulog.set_dial(Dial(menulog))
 
     menulog.mainloop()
