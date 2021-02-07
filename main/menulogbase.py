@@ -11,6 +11,7 @@ class MenulogApp(tkinter.Tk):
         super().__init__()
 
         self.title(title)
+        self.MAX_LOG = 1000
 
         self.cli = tkinter.StringVar()
         self.mouse_click_count = 0
@@ -67,7 +68,7 @@ class MenulogApp(tkinter.Tk):
         return
 
     def setup_ui_menu_area(self, frame):
-        font_menu = tkinter.font.Font(self, size=12, weight='normal', underline=False)
+        font_menu = tkinter.font.Font(self, size=11, weight='normal', underline=False)
 
         self.list_menu = Listbox(frame, width=40, selectmode=SINGLE, bg='#E0E0E0', font=font_menu)
 
@@ -116,7 +117,7 @@ class MenulogApp(tkinter.Tk):
     def add_log(self, msg):
         self.list_log.insert(END, msg)
         # msg = msg.strip()
-        while self.list_log.size() > 20:
+        while self.list_log.size() > self.MAX_LOG:
             self.list_log.delete(0)
         # if len(msg) > 0:
         #     self.listLog.insert(END, msg)
@@ -124,7 +125,7 @@ class MenulogApp(tkinter.Tk):
         return
 
     def run_cli(self, _):
-        self.dial.run(MenulogApp.to_cmd_line(self.cli.get()))
+        self.dial.run(self.cli.get())
         self.cli.set("")
         return
 
@@ -194,19 +195,31 @@ class MenulogApp(tkinter.Tk):
 
     @staticmethod
     def to_view(line):
-        arr_arg = line.strip().split('//', 1)
-        if len(arr_arg) > 1:
-            return "【" + arr_arg[1] + "】"
+        # m = re.search(PATTERN, line, re.DOTALL)
+        m = re.search("(\\s?)(.+)//(.+)", line, flags=0)
+        if m:
+            return m.group(1) + "【" + m.group(3) + "】" + m.group(2)
         else:
             return line
 
+        # arr_arg = line.strip().split('//', 1)
+        # if len(arr_arg) > 1:
+        #     return "【" + arr_arg[1] + "】"
+        # else:
+        #     return line
+
     @staticmethod
     def to_cmd_line(line):
-        arr_arg = line.strip().split('//', 1)
-        if len(arr_arg) > 1:
-            return arr_arg[0]
+        m = re.search("(.+)//(.+)", line.strip(), flags=0)
+        if m:
+            return m.group(1)
         else:
-            return line.strip()
+            return ''
+        # arr_arg = line.strip().split('//', 1)
+        # if len(arr_arg) > 1:
+        #     return arr_arg[0]
+        # else:
+        #     return ''
 
 
 class TopLevelPausedLog(tkinter.Toplevel):
@@ -223,6 +236,7 @@ class TopLevelPausedLog(tkinter.Toplevel):
         txt_log = Text(self, yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set, width=80, height=60,
                        bg='#D0D0D0',
                        fg='black', wrap='none')
+
         txt_log.pack(expand=YES, fill=BOTH)
         for item in paused_log_list:
             txt_log.insert(END, item)
@@ -230,6 +244,8 @@ class TopLevelPausedLog(tkinter.Toplevel):
 
         scrollbar_y.config(command=txt_log.yview)
         scrollbar_x.config(command=txt_log.xview)
+
+        txt_log.yview_moveto(1)
 
         self.geometry('1200x600')
         self.geometry('+200+200')
