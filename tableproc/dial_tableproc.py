@@ -1,12 +1,12 @@
 from tkinter import *
+import os
+import tkinter as tkinter
+import tkinter.font
+
 from menulogbase import MenulogApp
 
 import model_tableproc
 from model_tableproc import DataSet
-
-import tkinter as tkinter
-import tkinter.font
-import menulogbase
 
 TITLE = 'menulog-table-process'
 USER_MENU_FILE = 'dial_tableproc.txt'
@@ -98,61 +98,57 @@ class Dial(tkinter.Frame):
         else:
             return False
 
+    @staticmethod
+    def get_lst_help():
+        return [
+            "Help",
+            "帮助",
+            "",
+            "功能：检查表格的对应关系",
+            "",
+            "先把两列数据（从EXCEL）分别拷贝粘贴到<InputA>列和<InputB>列",
+            "运行命令 " + CMD_CHECK_MATCH,
+            "",
+            "首先，算法分别检查<InputA>列和<InputB>列中有无重复项",
+            "如果有重复项，暂停进一步的检查，分别在<OutputA>列和<OutputB>列中指出重复位置。",
+            "数据行数较多时，需要把数据拷贝到对应的EXCEL表中进行比对。",
+            "在重复检查中，所有空格被忽略。",
+            "",
+            "然后，如果没有重复项，算法检查<InputA>列和<InputB>列中有无对应不上的项",
+            "如果有对应不上的项，分别在<OutputA>列和<OutputB>列中指出位置。",
+            "数据行数较多时，需要把数据拷贝到对应的EXCEL表中进行比对。",
+            "在对应检查中，所有空格被忽略。",
+            "",
+            "例子1（有重复项的情况）",
+            "运行命令 " + CMD_EXAMPLE_1,
+            "",
+            "例子2（有对应不上的项的情况，没有重复项）",
+            "运行命令 " + CMD_EXAMPLE_2,
+            "",
+            "Support Chinese 汉字, Korean 조선어, Japanese にほんご",
+            ""
+        ]
 
-def get_lst_help():
-    lst_help = [
-        "Help",
-        "帮助",
-        "",
-        "功能：检查表格的对应关系",
-        "",
-        "先把两列数据（从EXCEL）分别拷贝粘贴到<InputA>列和<InputB>列",
-        "运行命令 " + CMD_CHECK_MATCH,
-        "",
-        "首先，算法分别检查<InputA>列和<InputB>列中有无重复项",
-        "如果有重复项，暂停进一步的检查，分别在<OutputA>列和<OutputB>列中指出重复位置。",
-        "数据行数较多时，需要把数据拷贝到对应的EXCEL表中进行比对。",
-        "在重复检查中，所有空格被忽略。",
-        "",
-        "然后，如果没有重复项，算法检查<InputA>列和<InputB>列中有无对应不上的项",
-        "如果有对应不上的项，分别在<OutputA>列和<OutputB>列中指出位置。",
-        "数据行数较多时，需要把数据拷贝到对应的EXCEL表中进行比对。",
-        "在对应检查中，所有空格被忽略。",
-        "",
-        "例子1（有重复项的情况）",
-        "运行命令 " + CMD_EXAMPLE_1,
-        "",
-        "例子2（有对应不上的项的情况，没有重复项）",
-        "运行命令 " + CMD_EXAMPLE_2,
-        "",
-        "Support Chinese 汉字, Korean 조선어, Japanese にほんご",
-        ""
-    ]
-    lst_help = lst_help + menulogbase.get_common_help_list()
-    return lst_help
-
-
-def prepare_factory_menu():
-    lst_menu = [
-        "",
-        "功能：表格处理 Table data process",
-        "",
-        CMD_CHECK_MATCH + "//检查表格对应",
-        "",
-        "例子1（有重复项的情况）",
-        CMD_EXAMPLE_1 + "//表格对应_EXAMPLE_1",
-        "",
-        "例子2（有对应不上的项的情况，没有重复项）",
-        CMD_EXAMPLE_2 + "//表格对应_EXAMPLE_2",
-        "",
-        ""
-    ]
-    lst_menu = lst_menu + menulogbase.get_common_factory_menu()
-    return lst_menu
+    @staticmethod
+    def get_factory_menu():
+        return [
+            "",
+            "功能：表格处理 Table data process",
+            "",
+            CMD_CHECK_MATCH + "//检查表格对应",
+            "",
+            "例子1（有重复项的情况）",
+            CMD_EXAMPLE_1 + "//表格对应_EXAMPLE_1",
+            "",
+            "例子2（有对应不上的项的情况，没有重复项）",
+            CMD_EXAMPLE_2 + "//表格对应_EXAMPLE_2",
+            "",
+            ""
+        ]
 
 
 if __name__ == '__main__':
-    menulog = MenulogApp(TITLE, USER_MENU_FILE, prepare_factory_menu(), get_lst_help())
+    menulog = MenulogApp(TITLE, os.path.join(os.path.dirname(__file__), USER_MENU_FILE))
     menulog.set_dial(Dial(menulog))
 
     menulog.mainloop()
