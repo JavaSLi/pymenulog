@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/menulog.iml" filepath="$PROJECT_DIR$/.idea/menulog.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/pymenulog.iml" filepath="$PROJECT_DIR$/.idea/pymenulog.iml" />
     </modules>
   </component>
 </project>
