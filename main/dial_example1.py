@@ -1,9 +1,9 @@
 from tkinter import *
-from menulogbase import MenulogApp
-import menulogbase
-
+import os
 import tkinter as tkinter
 import tkinter.font
+
+from menulogbase import MenulogApp
 
 TITLE = 'Menulog Example-1'
 USER_MENU_FILE = 'dial_example1.txt'
@@ -83,35 +83,31 @@ class Dial(tkinter.Frame):
         #     return False
         return False
 
+    @staticmethod
+    def get_lst_help():
+        return [
+            "Help",
+            "帮助",
+            "",
+            ""
+        ]
 
-def get_lst_help():
-    lst_help = [
-        "Help",
-        "帮助",
-        "",
-        ""
-    ]
-    lst_help = lst_help + menulogbase.get_common_help_list()
-    return lst_help
-
-
-def prepare_factory_menu():
-    lst_menu = [
-        "",
-        "UNDER CONSTRUCTION",
-        "",
-        "UNDER CONSTRUCTION",
-        "",
-        "UNDER CONSTRUCTION",
-        "",
-        ""
-    ]
-    lst_menu = lst_menu + menulogbase.get_common_factory_menu()
-    return lst_menu
+    @staticmethod
+    def get_factory_menu():
+        return [
+            "",
+            "UNDER CONSTRUCTION",
+            "",
+            "UNDER CONSTRUCTION",
+            "",
+            "UNDER CONSTRUCTION",
+            "",
+            ""
+        ]
 
 
 if __name__ == '__main__':
-    menulog = MenulogApp(TITLE, USER_MENU_FILE, prepare_factory_menu(), get_lst_help())
+    menulog = MenulogApp(TITLE, os.path.join(os.path.dirname(__file__), USER_MENU_FILE))
     menulog.set_dial(Dial(menulog))
 
     menulog.mainloop()
